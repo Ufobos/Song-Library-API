@@ -1,0 +1,34 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=daniil
+      - DB_PASSWORD=qwerty
+      - DB_NAME=song_library
+      - API_URL=http://external-api-url.com
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:14
+    environment:
+      - POSTGRES_USER=daniil
+      - POSTGRES_PASSWORD=qwerty
+      - POSTGRES_DB=song_library
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U daniil -d song_library"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  db_data:
